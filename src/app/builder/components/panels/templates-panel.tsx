@@ -1,65 +1,46 @@
 "use client";
 
+import { useState, useMemo } from "react";
+import { Search, X } from "lucide-react";
+import { PRESET_THEMES } from "~/constant/bg-templates";
 import { useBuilder } from "../../context";
-import type { Theme } from "../../types";
+import type { Theme, Background } from "../../types";
 import { cn } from "~/lib/utils";
-
-const PRESET_THEMES: Theme[] = [
-  {
-    id: "minimal",
-    name: "Minimal",
-    colors: { primary: "#0A0A0A", secondary: "#FFFFFF", background: "#0A0A0A", text: "#FFFFFF", accent: "#3B82F6", muted: "#6B7280" },
-    fonts: { heading: "Inter, sans-serif", body: "Inter, sans-serif", code: "monospace" },
-  },
-  {
-    id: "developer",
-    name: "Developer",
-    colors: { primary: "#1E1E2E", secondary: "#CDD6F4", background: "#1E1E2E", text: "#CDD6F4", accent: "#89B4FA", muted: "#6C7086" },
-    fonts: { heading: "monospace", body: "monospace", code: "monospace" },
-  },
-  {
-    id: "editorial",
-    name: "Editorial",
-    colors: { primary: "#FAF3E0", secondary: "#1A1A1A", background: "#FAF3E0", text: "#1A1A1A", accent: "#C9A45C", muted: "#8B8680" },
-    fonts: { heading: "Georgia, serif", body: "Georgia, serif", code: "monospace" },
-  },
-  {
-    id: "gradient-ocean",
-    name: "Ocean",
-    colors: { primary: "#0F172A", secondary: "#E2E8F0", background: "#0F172A", text: "#E2E8F0", accent: "#38BDF8", muted: "#64748B" },
-    fonts: { heading: "Inter, sans-serif", body: "Inter, sans-serif", code: "monospace" },
-  },
-  {
-    id: "dark",
-    name: "Dark",
-    colors: { primary: "#000000", secondary: "#FAFAFA", background: "#000000", text: "#FAFAFA", accent: "#A855F7", muted: "#71717A" },
-    fonts: { heading: "Inter, sans-serif", body: "Inter, sans-serif", code: "monospace" },
-  },
-  {
-    id: "light",
-    name: "Light",
-    colors: { primary: "#FFFFFF", secondary: "#09090B", background: "#FFFFFF", text: "#09090B", accent: "#2563EB", muted: "#A1A1AA" },
-    fonts: { heading: "Inter, sans-serif", body: "Inter, sans-serif", code: "monospace" },
-  },
-  {
-    id: "technical",
-    name: "Technical",
-    colors: { primary: "#0D1117", secondary: "#C9D1D9", background: "#0D1117", text: "#C9D1D9", accent: "#58A6FF", muted: "#8B949E" },
-    fonts: { heading: "Inter, sans-serif", body: "Inter, sans-serif", code: "JetBrains Mono, monospace" },
-  },
-  {
-    id: "bold",
-    name: "Bold",
-    colors: { primary: "#EF4444", secondary: "#FFFFFF", background: "#EF4444", text: "#FFFFFF", accent: "#FCD34D", muted: "#FCA5A5" },
-    fonts: { heading: "Inter, sans-serif", body: "Inter, sans-serif", code: "monospace" },
-  },
-];
+import { Input } from "~/components/ui/input";
 
 export function TemplatesPanel() {
   const { state, dispatch } = useBuilder();
+  const [search, setSearch] = useState("");
+
+  const filteredThemes = useMemo(() => {
+    if (!search.trim()) return PRESET_THEMES;
+    const q = search.toLowerCase().trim();
+    return PRESET_THEMES.filter(
+      (t) =>
+        t.name.toLowerCase().includes(q) ||
+        t.id.toLowerCase().includes(q),
+    );
+  }, [search]);
 
   const handleApplyTheme = (theme: Theme) => {
     dispatch({ type: "SET_THEME", payload: { theme } });
+
+    // Determine whether background is gradient/mesh/complex or solid
+    const isComplexBg =
+      theme.colors.background.includes("gradient") ||
+      theme.colors.background.includes(",");
+
+    const newBg: Background = isComplexBg
+      ? {
+          type: "preset",
+          presetId: `template-${theme.id}`,
+          name: theme.name,
+          style: { background: theme.colors.background },
+        }
+      : {
+          type: "solid",
+          color: theme.colors.background,
+        };
 
     // Update all slides' backgrounds to match theme
     state.slides.forEach((slide, i) => {
@@ -68,16 +49,20 @@ export function TemplatesPanel() {
         payload: {
           index: i,
           slide: {
-            background: { type: "solid", color: theme.colors.background },
+            background: newBg,
           },
         },
       });
     });
 
     // Update text colors for all elements across all slides
-    state.slides.forEach((slide, i) => {
+    state.slides.forEach((slide) => {
       slide.elements.forEach((el) => {
-        if (el.type === "text" || el.type === "watermark" || el.type === "code") {
+        if (
+          el.type === "text" ||
+          el.type === "watermark" ||
+          el.type === "code"
+        ) {
           dispatch({
             type: "UPDATE_ELEMENT",
             payload: {
@@ -92,42 +77,79 @@ export function TemplatesPanel() {
 
   return (
     <div className="space-y-3">
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Templates
-      </h4>
+      <div className="flex items-center justify-between">
+        <h4 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          Templates ({PRESET_THEMES.length})
+        </h4>
+      </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        {PRESET_THEMES.map((theme) => (
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-3.5 w-3.5" />
+        <Input
+          placeholder="Search templates..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-8 pr-8 pl-8 text-xs"
+        />
+        {search && (
           <button
-            key={theme.id}
-            className={cn(
-              "rounded-lg border-2 overflow-hidden transition-all hover:shadow-md",
-              state.theme.id === theme.id ? "border-primary" : "border-transparent hover:border-muted-foreground/20",
-            )}
-            onClick={() => handleApplyTheme(theme)}
+            onClick={() => setSearch("")}
+            className="text-muted-foreground hover:text-foreground absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-sm"
           >
-            <div
-              className="aspect-[4/5] p-3 flex flex-col items-center justify-center gap-1.5"
-              style={{ backgroundColor: theme.colors.background }}
+            <X className="h-3 w-3" />
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 pb-4">
+        {filteredThemes.map((theme) => {
+          const isSelected = state.theme.id === theme.id;
+          return (
+            <button
+              key={theme.id}
+              className={cn(
+                "group relative overflow-hidden rounded-lg border-2 text-left transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer",
+                isSelected
+                  ? "border-primary ring-2 ring-primary/30 shadow-md"
+                  : "border-border hover:border-muted-foreground/30",
+              )}
+              onClick={() => handleApplyTheme(theme)}
             >
               <div
-                className="text-xs font-bold truncate w-full text-center"
-                style={{ color: theme.colors.text, fontFamily: theme.fonts.heading }}
+                className="flex aspect-[4/5] flex-col items-center justify-between p-3 relative overflow-hidden"
+                style={{ background: theme.colors.background }}
               >
-                {theme.name}
-              </div>
-              <div className="flex gap-1">
-                {[theme.colors.primary, theme.colors.accent, theme.colors.muted].map((c, i) => (
+                <div className="w-full text-center">
                   <div
-                    key={i}
-                    className="w-3 h-3 rounded-full border border-white/10"
-                    style={{ backgroundColor: c }}
-                  />
-                ))}
+                    className="truncate text-xs font-bold drop-shadow-xs"
+                    style={{
+                      color: theme.colors.text,
+                      fontFamily: theme.fonts.heading,
+                    }}
+                  >
+                    {theme.name}
+                  </div>
+                </div>
+
+                {/* Color swatches */}
+                <div className="flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 backdrop-blur-xs">
+                  {[
+                    theme.colors.primary,
+                    theme.colors.accent,
+                    theme.colors.muted,
+                  ].map((c, i) => (
+                    <div
+                      key={i}
+                      className="h-2.5 w-2.5 rounded-full border border-white/20 shadow-xs"
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

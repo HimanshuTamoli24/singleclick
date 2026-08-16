@@ -1,15 +1,11 @@
 // ─── Canvas Constants ───
 export const CANVAS_WIDTH = 1080;
 export const CANVAS_HEIGHT = 1350;
+export const MAX_SLIDES = 20;
 
 // ─── Element Types ───
 export type ElementType =
-  | "text"
-  | "image"
-  | "shape"
-  | "code"
-  | "icon"
-  | "watermark";
+  "text" | "image" | "shape" | "code" | "icon" | "watermark";
 
 export type ShapeVariant = "rectangle" | "circle" | "line" | "arrow";
 
@@ -21,13 +17,7 @@ export type ObjectFit = "cover" | "contain" | "fill";
 export type BackgroundType = "solid" | "gradient" | "image" | "pattern";
 export type GradientType = "linear" | "radial";
 export type PatternType =
-  | "dots"
-  | "grid"
-  | "diagonal"
-  | "cross"
-  | "noise"
-  | "waves"
-  | "mesh";
+  "dots" | "grid" | "diagonal" | "cross" | "noise" | "waves" | "mesh";
 
 export interface SolidBackground {
   type: "solid";
@@ -216,11 +206,7 @@ export interface Theme {
 
 // ─── Left Panel Tabs ───
 export type LeftPanelTab =
-  | "slides"
-  | "templates"
-  | "elements"
-  | "assets"
-  | "background";
+  "slides" | "templates" | "elements" | "assets" | "background";
 
 // ─── View Mode ───
 export type ViewMode = "desktop" | "mobile";
@@ -261,11 +247,17 @@ export type BuilderAction =
   | { type: "UPDATE_SLIDE"; payload: { index: number; slide: Partial<Slide> } }
   | { type: "SET_BACKGROUND"; payload: { background: Background } }
   | { type: "ADD_ELEMENT"; payload: { element: SlideElement } }
-  | { type: "UPDATE_ELEMENT"; payload: { id: string; updates: Partial<SlideElement> } }
+  | {
+      type: "UPDATE_ELEMENT";
+      payload: { id: string; updates: Partial<SlideElement> };
+    }
   | { type: "DELETE_ELEMENT"; payload: { id: string } }
   | { type: "DUPLICATE_ELEMENT"; payload: { id: string } }
   | { type: "SELECT_ELEMENT"; payload: { id: string | null } }
-  | { type: "MOVE_ELEMENT_LAYER"; payload: { id: string; direction: "up" | "down" | "top" | "bottom" } }
+  | {
+      type: "MOVE_ELEMENT_LAYER";
+      payload: { id: string; direction: "up" | "down" | "top" | "bottom" };
+    }
   | { type: "COPY_ELEMENT" }
   | { type: "PASTE_ELEMENT" }
   | { type: "UNDO" }
@@ -316,7 +308,9 @@ export function createDefaultSlide(slideType: SlideType = "content"): Slide {
 }
 
 // ─── Default Element Factories ───
-export function createTextElement(overrides: Partial<TextElement> = {}): TextElement {
+export function createTextElement(
+  overrides: Partial<TextElement> = {},
+): TextElement {
   return {
     id: generateId(),
     type: "text",
@@ -342,7 +336,9 @@ export function createTextElement(overrides: Partial<TextElement> = {}): TextEle
   };
 }
 
-export function createImageElement(overrides: Partial<ImageElement> = {}): ImageElement {
+export function createImageElement(
+  overrides: Partial<ImageElement> = {},
+): ImageElement {
   return {
     id: generateId(),
     type: "image",
@@ -365,7 +361,9 @@ export function createImageElement(overrides: Partial<ImageElement> = {}): Image
   };
 }
 
-export function createShapeElement(overrides: Partial<ShapeElement> = {}): ShapeElement {
+export function createShapeElement(
+  overrides: Partial<ShapeElement> = {},
+): ShapeElement {
   return {
     id: generateId(),
     type: "shape",
@@ -391,7 +389,9 @@ export function createShapeElement(overrides: Partial<ShapeElement> = {}): Shape
   };
 }
 
-export function createCodeElement(overrides: Partial<CodeElement> = {}): CodeElement {
+export function createCodeElement(
+  overrides: Partial<CodeElement> = {},
+): CodeElement {
   return {
     id: generateId(),
     type: "code",
@@ -416,7 +416,9 @@ export function createCodeElement(overrides: Partial<CodeElement> = {}): CodeEle
   };
 }
 
-export function createWatermarkElement(overrides: Partial<WatermarkElement> = {}): WatermarkElement {
+export function createWatermarkElement(
+  overrides: Partial<WatermarkElement> = {},
+): WatermarkElement {
   return {
     id: generateId(),
     type: "watermark",

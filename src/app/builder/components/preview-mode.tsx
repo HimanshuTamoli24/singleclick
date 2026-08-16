@@ -10,7 +10,7 @@ export function PreviewMode() {
   const { state, dispatch } = useBuilder();
 
   return (
-    <div className="h-screen bg-black flex flex-col items-center justify-center relative">
+    <div className="relative flex h-screen flex-col items-center justify-center bg-black">
       {/* Close button */}
       <Button
         variant="ghost"
@@ -35,28 +35,31 @@ export function PreviewMode() {
             transform: "scale(0.5)",
             transformOrigin: "top left",
           }}
-          className="rounded-lg overflow-hidden"
+          className="overflow-hidden rounded-lg"
         >
           <EditorCanvas />
         </div>
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center gap-6 mt-8">
+      <div className="mt-8 flex items-center gap-6">
         <Button
           variant="ghost"
           size="sm"
           className="text-white hover:bg-white/10"
           onClick={() => {
             if (state.activeSlideIndex > 0) {
-              dispatch({ type: "SELECT_SLIDE", payload: { index: state.activeSlideIndex - 1 } });
+              dispatch({
+                type: "SELECT_SLIDE",
+                payload: { index: state.activeSlideIndex - 1 },
+              });
             }
           }}
           disabled={state.activeSlideIndex === 0}
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
-        <span className="text-white text-sm font-medium">
+        <span className="text-sm font-medium text-white">
           {state.activeSlideIndex + 1} / {state.slides.length}
         </span>
         <Button
@@ -65,7 +68,10 @@ export function PreviewMode() {
           className="text-white hover:bg-white/10"
           onClick={() => {
             if (state.activeSlideIndex < state.slides.length - 1) {
-              dispatch({ type: "SELECT_SLIDE", payload: { index: state.activeSlideIndex + 1 } });
+              dispatch({
+                type: "SELECT_SLIDE",
+                payload: { index: state.activeSlideIndex + 1 },
+              });
             }
           }}
           disabled={state.activeSlideIndex === state.slides.length - 1}

@@ -9,7 +9,9 @@ import { FloatingToolbar } from "./floating-toolbar";
 function getBackgroundStyle(bg: Background): React.CSSProperties {
   switch (bg.type) {
     case "solid":
-      return { backgroundColor: bg.color };
+      return bg.color?.includes("gradient") || bg.color?.includes(",")
+        ? { background: bg.color }
+        : { backgroundColor: bg.color };
     case "gradient": {
       const colors = bg.colors.join(", ");
       if (bg.gradientType === "radial") {

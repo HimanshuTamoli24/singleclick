@@ -4,7 +4,6 @@ import {
   Undo2,
   Redo2,
   Monitor,
-  Smartphone,
   ZoomIn,
   ZoomOut,
   Eye,
@@ -28,30 +27,35 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
   const [editingTitle, setEditingTitle] = useState(false);
 
   return (
-    <header className="h-12 border-b bg-background flex items-center justify-between px-4 shrink-0 z-50">
+    <header className="bg-background z-50 flex h-12 shrink-0 items-center justify-between border-b px-4">
       {/* Left Section */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
+          <div className="bg-primary flex h-6 w-6 items-center justify-center rounded-md">
             <span className="text-primary-foreground text-xs font-bold">P</span>
           </div>
           <span className="text-sm font-semibold">PostBuilder</span>
         </div>
 
-        <div className="w-px h-5 bg-border" />
+        <div className="bg-border h-5 w-px" />
 
         {editingTitle ? (
           <input
-            className="text-sm bg-transparent border-b border-primary outline-none px-1 py-0.5 w-48"
+            className="border-primary w-48 border-b bg-transparent px-1 py-0.5 text-sm outline-none"
             value={state.projectTitle}
-            onChange={(e) => dispatch({ type: "SET_PROJECT_TITLE", payload: { title: e.target.value } })}
+            onChange={(e) =>
+              dispatch({
+                type: "SET_PROJECT_TITLE",
+                payload: { title: e.target.value },
+              })
+            }
             onBlur={() => setEditingTitle(false)}
             onKeyDown={(e) => e.key === "Enter" && setEditingTitle(false)}
             autoFocus
           />
         ) : (
           <button
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-foreground text-sm transition-colors"
             onClick={() => setEditingTitle(true)}
           >
             {state.projectTitle}
@@ -82,42 +86,40 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           <Redo2 className="h-4 w-4" />
         </Button>
 
-        <div className="w-px h-5 bg-border mx-2" />
+        <div className="bg-border mx-2 h-5 w-px" />
 
         <Button
           variant={state.viewMode === "desktop" ? "secondary" : "ghost"}
           size="sm"
-          onClick={() => dispatch({ type: "SET_VIEW_MODE", payload: { mode: "desktop" } })}
+          onClick={() =>
+            dispatch({ type: "SET_VIEW_MODE", payload: { mode: "desktop" } })
+          }
           className="h-8 w-8 p-0"
         >
           <Monitor className="h-4 w-4" />
         </Button>
-        <Button
-          variant={state.viewMode === "mobile" ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => dispatch({ type: "SET_VIEW_MODE", payload: { mode: "mobile" } })}
-          className="h-8 w-8 p-0"
-        >
-          <Smartphone className="h-4 w-4" />
-        </Button>
 
-        <div className="w-px h-5 bg-border mx-2" />
+        <div className="bg-border mx-2 h-5 w-px" />
 
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => dispatch({ type: "SET_ZOOM", payload: { zoom: state.zoom - 10 } })}
+          onClick={() =>
+            dispatch({ type: "SET_ZOOM", payload: { zoom: state.zoom - 10 } })
+          }
           className="h-8 w-8 p-0"
         >
           <ZoomOut className="h-4 w-4" />
         </Button>
-        <span className="text-xs font-medium text-muted-foreground min-w-[40px] text-center">
+        <span className="text-muted-foreground min-w-[40px] text-center text-xs font-medium">
           {state.zoom}%
         </span>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => dispatch({ type: "SET_ZOOM", payload: { zoom: state.zoom + 10 } })}
+          onClick={() =>
+            dispatch({ type: "SET_ZOOM", payload: { zoom: state.zoom + 10 } })
+          }
           className="h-8 w-8 p-0"
         >
           <ZoomIn className="h-4 w-4" />
@@ -126,7 +128,12 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
 
       {/* Right Section */}
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={onAIGenerate}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 gap-1.5"
+          onClick={onAIGenerate}
+        >
           <Sparkles className="h-3.5 w-3.5" />
           AI Generate
         </Button>
@@ -146,21 +153,25 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
         </Button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger
-            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground h-8 px-3 text-sm font-medium hover:bg-primary/90 cursor-pointer"
-          >
+          <DropdownMenuTrigger className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium">
             <Download className="h-3.5 w-3.5" />
             Export
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
-            <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Current Slide</div>
+            <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
+              Current Slide
+            </div>
             <DropdownMenuItem>PNG</DropdownMenuItem>
             <DropdownMenuItem>JPG</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">All Slides</div>
+            <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
+              All Slides
+            </div>
             <DropdownMenuItem>ZIP (all as PNG)</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Carousel</div>
+            <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
+              Carousel
+            </div>
             <DropdownMenuItem>PDF</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

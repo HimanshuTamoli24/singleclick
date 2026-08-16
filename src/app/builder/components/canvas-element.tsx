@@ -11,7 +11,11 @@ interface CanvasElementProps {
   onSelect: () => void;
 }
 
-export function CanvasElement({ element, isSelected, onSelect }: CanvasElementProps) {
+export function CanvasElement({
+  element,
+  isSelected,
+  onSelect,
+}: CanvasElementProps) {
   const { dispatch } = useBuilder();
   const elementRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -33,7 +37,9 @@ export function CanvasElement({ element, isSelected, onSelect }: CanvasElementPr
 
       const handleMouseMove = (ev: MouseEvent) => {
         // We need the canvas scale factor — get it from the transform
-        const canvas = elementRef.current?.closest("[data-canvas]") as HTMLElement | null;
+        const canvas = elementRef.current?.closest(
+          "[data-canvas]",
+        ) as HTMLElement | null;
         const scale = canvas ? parseFloat(canvas.dataset.scale ?? "1") : 1;
         const dx = (ev.clientX - dragStart.current.x) / scale;
         const dy = (ev.clientY - dragStart.current.y) / scale;
@@ -114,7 +120,7 @@ export function CanvasElement({ element, isSelected, onSelect }: CanvasElementPr
           />
         ) : (
           <div
-            className="w-full h-full bg-muted/20 flex items-center justify-center text-muted-foreground border border-dashed border-muted-foreground/30 rounded-md"
+            className="bg-muted/20 text-muted-foreground border-muted-foreground/30 flex h-full w-full items-center justify-center rounded-md border border-dashed"
             style={{ borderRadius: element.borderRadius }}
           >
             <span className="text-2xl">🖼️</span>
@@ -131,7 +137,8 @@ export function CanvasElement({ element, isSelected, onSelect }: CanvasElementPr
               borderColor: element.borderColor,
               borderWidth: element.borderWidth,
               borderStyle: element.borderWidth > 0 ? "solid" : "none",
-              borderRadius: element.variant === "circle" ? "50%" : element.borderRadius,
+              borderRadius:
+                element.variant === "circle" ? "50%" : element.borderRadius,
               boxShadow:
                 element.shadowBlur > 0
                   ? `${element.shadowOffsetX}px ${element.shadowOffsetY}px ${element.shadowBlur}px ${element.shadowColor}`
@@ -170,7 +177,7 @@ export function CanvasElement({ element, isSelected, onSelect }: CanvasElementPr
       case "icon":
         return (
           <div
-            className="flex items-center justify-center w-full h-full"
+            className="flex h-full w-full items-center justify-center"
             style={{ color: element.color, fontSize: element.size }}
           >
             ⬟
@@ -218,10 +225,10 @@ export function CanvasElement({ element, isSelected, onSelect }: CanvasElementPr
       {/* Resize handles when selected */}
       {isSelected && !element.locked && (
         <>
-          <div className="absolute -top-1 -left-1 w-2.5 h-2.5 bg-white border border-blue-500 rounded-sm cursor-nw-resize" />
-          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-white border border-blue-500 rounded-sm cursor-ne-resize" />
-          <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 bg-white border border-blue-500 rounded-sm cursor-sw-resize" />
-          <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-white border border-blue-500 rounded-sm cursor-se-resize" />
+          <div className="absolute -top-1 -left-1 h-2.5 w-2.5 cursor-nw-resize rounded-sm border border-blue-500 bg-white" />
+          <div className="absolute -top-1 -right-1 h-2.5 w-2.5 cursor-ne-resize rounded-sm border border-blue-500 bg-white" />
+          <div className="absolute -bottom-1 -left-1 h-2.5 w-2.5 cursor-sw-resize rounded-sm border border-blue-500 bg-white" />
+          <div className="absolute -right-1 -bottom-1 h-2.5 w-2.5 cursor-se-resize rounded-sm border border-blue-500 bg-white" />
         </>
       )}
     </div>

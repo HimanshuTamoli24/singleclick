@@ -7,6 +7,7 @@ import { Button } from "~/components/ui/button";
 import {
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
+  MAX_SLIDES,
   type Slide,
   type Background,
 } from "../types";
@@ -16,7 +17,9 @@ import { cn } from "~/lib/utils";
 function getSlideBgStyle(bg: Background): React.CSSProperties {
   switch (bg.type) {
     case "solid":
-      return { backgroundColor: bg.color };
+      return bg.color?.includes("gradient") || bg.color?.includes(",")
+        ? { background: bg.color }
+        : { backgroundColor: bg.color };
     case "gradient": {
       const colors = bg.colors.join(", ");
       return bg.gradientType === "radial"
@@ -58,10 +61,10 @@ function SlideStripThumbnail({
     <button
       onClick={onClick}
       className={cn(
-        "group relative flex-shrink-0 overflow-hidden rounded-md transition-all duration-200 ease-out focus:outline-none cursor-pointer",
+        "group relative flex-shrink-0 cursor-pointer overflow-hidden rounded-md transition-all duration-200 ease-out focus:outline-none",
         isActive
-          ? "grayscale-0 opacity-100 ring-2 ring-primary ring-offset-2 ring-offset-background scale-105 shadow-md border-primary z-10"
-          : "grayscale opacity-60 hover:grayscale-0 hover:opacity-100 hover:scale-105 hover:ring-2 hover:ring-blue-400 hover:border-blue-400 border border-border/80",
+          ? "ring-primary ring-offset-background border-primary z-10 scale-105 opacity-100 shadow-md ring-2 ring-offset-2 grayscale-0"
+          : "border-border/80 border opacity-60 grayscale hover:scale-105 hover:border-blue-400 hover:opacity-100 hover:ring-2 hover:ring-blue-400 hover:grayscale-0",
       )}
       style={{
         width: thumbW,
@@ -168,7 +171,7 @@ function SlideStripThumbnail({
       </div>
 
       {/* Index badge */}
-      <span className="absolute right-1 bottom-1 rounded bg-black/70 px-1 py-0.2 text-[9px] leading-tight font-semibold text-white/90 backdrop-blur-[2px]">
+      <span className="py-0.2 absolute right-1 bottom-1 rounded bg-black/70 px-1 text-[9px] leading-tight font-semibold text-white/90 backdrop-blur-[2px]">
         {index + 1}
       </span>
     </button>
@@ -259,7 +262,10 @@ export function CanvasWorkspace() {
     const el = filmstripRef.current;
     if (!el) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const ratio = Math.max(
+      0,
+      Math.min(1, (e.clientX - rect.left) / rect.width),
+    );
     const maxScroll = el.scrollWidth - el.clientWidth;
     el.scrollTo({
       left: ratio * maxScroll,
@@ -326,18 +332,32 @@ export function CanvasWorkspace() {
       <div className="bg-background/95 z-10 flex shrink-0 flex-col items-center gap-1.5 border-t px-4 py-2 shadow-sm backdrop-blur-sm">
         {/* Slide count pill */}
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground bg-muted/60 rounded-full border px-3 py-0.5 text-[11px] font-medium tracking-wide">
-            {state.activeSlideIndex + 1} / {state.slides.length}
+          <span
+            className={cn(
+              "flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-[11px] font-medium tracking-wide transition-colors",
+              state.slides.length >= MAX_SLIDES
+                ? "border-amber-500/30 bg-amber-500/10 font-semibold text-amber-600 dark:text-amber-400"
+                : "text-muted-foreground bg-muted/60",
+            )}
+          >
+            <span>
+              Slide {state.activeSlideIndex + 1} / {state.slides.length}
+            </span>
+            {state.slides.length >= MAX_SLIDES && (
+              <span className="py-0.2 rounded bg-amber-500/20 px-1.5 text-[9px] font-bold tracking-wider uppercase">
+                Max {MAX_SLIDES}
+              </span>
+            )}
           </span>
         </div>
 
         {/* Filmstrip with 5-slide viewport & side Chevrons */}
-        <div className="flex items-center justify-center gap-1.5 w-full">
+        <div className="flex w-full items-center justify-center gap-1.5">
           {/* Left chevron */}
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground h-8 w-8 rounded-full p-0 flex-shrink-0 hover:bg-muted"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted h-8 w-8 flex-shrink-0 rounded-full p-0"
             onClick={() => handleScroll("left")}
             disabled={!canScrollLeft && state.activeSlideIndex === 0}
             title="Scroll Left"
@@ -346,10 +366,10 @@ export function CanvasWorkspace() {
           </Button>
 
           {/* 5-Slide Visible Container (~360px max width for 5 thumbnails + gaps) */}
-          <div className="max-w-[360px] overflow-hidden px-1 py-1">
+          <div className="max-w-[360px] overflow-hidden ">
             <div
               ref={filmstripRef}
-              className="flex items-center gap-2.5 overflow-x-auto scroll-smooth scrollbar-none py-1 px-1"
+              className="p-2 flex scrollbar-none items-center gap-2.5 overflow-x-auto scroll-smooth"
               style={{
                 scrollSnapType: "x mandatory",
               }}
@@ -361,7 +381,10 @@ export function CanvasWorkspace() {
                     index={i}
                     isActive={state.activeSlideIndex === i}
                     onClick={() =>
-                      dispatch({ type: "SELECT_SLIDE", payload: { index: i } })
+                      dispatch({
+                        type: "SELECT_SLIDE",
+                        payload: { index: i },
+                      })
                     }
                   />
                 </div>
@@ -369,16 +392,32 @@ export function CanvasWorkspace() {
 
               {/* Quick Add Slide Button */}
               <button
-                onClick={() => dispatch({ type: "ADD_SLIDE" })}
-                className="border-muted-foreground/30 hover:border-primary text-muted-foreground hover:text-primary hover:bg-muted/40 flex flex-shrink-0 flex-col items-center justify-center rounded-md border border-dashed transition-all duration-150 cursor-pointer"
+                onClick={() => {
+                  if (state.slides.length < MAX_SLIDES) {
+                    dispatch({ type: "ADD_SLIDE" });
+                  }
+                }}
+                disabled={state.slides.length >= MAX_SLIDES}
+                className={cn(
+                  "flex flex-shrink-0 flex-col items-center justify-center rounded-md border border-dashed transition-all duration-150",
+                  state.slides.length >= MAX_SLIDES
+                    ? "border-muted-foreground/20 text-muted-foreground/40 cursor-not-allowed opacity-40"
+                    : "border-muted-foreground/30 hover:border-primary text-muted-foreground hover:text-primary hover:bg-muted/40 cursor-pointer",
+                )}
                 style={{
                   width: CANVAS_WIDTH * 0.055,
                   height: CANVAS_HEIGHT * 0.055,
                 }}
-                title="Add new slide"
+                title={
+                  state.slides.length >= MAX_SLIDES
+                    ? `Max limit of ${MAX_SLIDES} slides reached`
+                    : "Add new slide"
+                }
               >
                 <Plus className="h-4 w-4" />
-                <span className="mt-0.5 text-[9px] font-medium">Add</span>
+                <span className="mt-0.5 text-[9px] font-medium">
+                  {state.slides.length >= MAX_SLIDES ? "Max" : "Add"}
+                </span>
               </button>
             </div>
           </div>
@@ -387,30 +426,33 @@ export function CanvasWorkspace() {
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground h-8 w-8 rounded-full p-0 flex-shrink-0 hover:bg-muted"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted h-8 w-8 flex-shrink-0 rounded-full p-0"
             onClick={() => handleScroll("right")}
-            disabled={!canScrollRight && state.activeSlideIndex === state.slides.length - 1}
+            disabled={
+              !canScrollRight &&
+              state.activeSlideIndex === state.slides.length - 1
+            }
             title="Scroll Right"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
 
-        {/* Fast Scrubber Ball / Track (like screenshot) */}
-        {state.slides.length > 3 && (
+        <div
+          className="bg-muted hover:bg-muted relative mt-0.5 h-2 w-28 cursor-pointer overflow-hidden rounded-full transition-colors"
+          onClick={handleScrubberClick}
+          title="Fast scroll scrubber"
+          style={{
+            scrollbarGutter: "stable",
+          }}
+        >
           <div
-            className="relative h-2 w-28 bg-muted/60 hover:bg-muted rounded-full cursor-pointer transition-colors overflow-hidden mt-0.5"
-            onClick={handleScrubberClick}
-            title="Fast scroll scrubber"
-          >
-            <div
-              className="absolute top-0.5 bottom-0.5 w-6 bg-muted-foreground/60 hover:bg-primary rounded-full transition-all duration-150"
-              style={{
-                left: `calc(${scrollProgress * 100}% - ${scrollProgress * 24}px)`,
-              }}
-            />
-          </div>
-        )}
+            className="bg-primary/60 absolute top-0.5 bottom-0.5 w-6 rounded-full transition-all duration-150"
+            style={{
+              left: `calc(${scrollProgress * 100}% - ${scrollProgress * 24}px)`,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

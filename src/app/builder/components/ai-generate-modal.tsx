@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Hash, AtSign, Layers, FileText } from "lucide-react";
+import {
+  Sparkles,
+  Hash,
+  AtSign,
+  Layers,
+  FileText,
+  Minus,
+  Plus,
+} from "lucide-react";
 import { useBuilder } from "../context";
 import { useAskAI } from "~/hooks/use-ai";
 import {
@@ -16,7 +24,13 @@ import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import type { Slide, SlideElement, SlideType } from "../types";
-import { generateId, createTextElement, createCodeElement, createWatermarkElement } from "../types";
+import {
+  generateId,
+  createTextElement,
+  createCodeElement,
+  createWatermarkElement,
+  MAX_SLIDES,
+} from "../types";
 
 interface AIGenerateModalProps {
   open: boolean;
@@ -25,7 +39,12 @@ interface AIGenerateModalProps {
 
 /** Convert one AI slide into our typed Slide with elements */
 function aiSlideToSlide(
-  aiSlide: { type: string; title?: string; subtitle?: string; content?: string[] },
+  aiSlide: {
+    type: string;
+    title?: string;
+    subtitle?: string;
+    content?: string[];
+  },
   themeColors: { background: string; text: string },
   watermarkText: string,
 ): Slide {
@@ -105,7 +124,11 @@ function aiSlideToSlide(
   elements.push(
     createWatermarkElement({
       name: "Watermark",
-      content: watermarkText.trim() ? (watermarkText.startsWith("@") ? watermarkText : `@${watermarkText}`) : "@yourhandle",
+      content: watermarkText.trim()
+        ? watermarkText.startsWith("@")
+          ? watermarkText
+          : `@${watermarkText}`
+        : "@yourhandle",
       x: 40,
       y: 1280,
       width: 260,
@@ -153,8 +176,12 @@ Generate exactly ${slideCount} slides. The first slide MUST be "intro" and the l
       {
         onSuccess: (resData) => {
           try {
-            let text = typeof resData === "string" ? resData : JSON.stringify(resData);
-            text = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+            let text =
+              typeof resData === "string" ? resData : JSON.stringify(resData);
+            text = text
+              .replace(/```json/gi, "")
+              .replace(/```/g, "")
+              .trim();
             const parsed = JSON.parse(text);
 
             if (parsed?.slides && Array.isArray(parsed.slides)) {
@@ -172,7 +199,10 @@ Generate exactly ${slideCount} slides. The first slide MUST be "intro" and the l
               dispatch({ type: "LOAD_SLIDES", payload: { slides } });
 
               if (parsed.title) {
-                dispatch({ type: "SET_PROJECT_TITLE", payload: { title: parsed.title } });
+                dispatch({
+                  type: "SET_PROJECT_TITLE",
+                  payload: { title: parsed.title },
+                });
               }
 
               onOpenChange(false);
@@ -194,14 +224,15 @@ Generate exactly ${slideCount} slides. The first slide MUST be "intro" and the l
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Sparkles className="text-primary h-5 w-5" />
             AI Carousel Generator
           </DialogTitle>
           <DialogDescription>
-            Configure your topic, slide count, watermark handle, and posting context for AI generation.
+            Configure your topic, slide count, watermark handle, and posting
+            context for AI generation.
           </DialogDescription>
         </DialogHeader>
 
@@ -209,40 +240,69 @@ Generate exactly ${slideCount} slides. The first slide MUST be "intro" and the l
           {/* Main Prompt */}
           <div className="space-y-1.5">
             <Label className="flex items-center gap-1.5 text-xs font-semibold">
-              <FileText className="h-3.5 w-3.5 text-primary" />
+              <FileText className="text-primary h-3.5 w-3.5" />
               Topic / Prompt <span className="text-destructive">*</span>
             </Label>
             <Textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="E.g. 5 Git commands every developer should know, explained with clean code examples..."
-              className="min-h-[85px] text-sm resize-none"
+              className="min-h-[85px] resize-none text-sm"
             />
           </div>
 
           {/* Number of Slides & Watermark in a 2-column row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5 text-xs font-semibold">
-                <Layers className="h-3.5 w-3.5 text-primary" />
+                <Layers className="text-primary h-3.5 w-3.5" />
                 Number of Slides
               </Label>
-              <Input
-                type="number"
-                value={slideCount}
-                onChange={(e) =>
-                  setSlideCount(Math.max(3, Math.min(15, parseInt(e.target.value) || 6)))
-                }
-                min={3}
-                max={15}
-                className="h-9 text-sm"
-              />
-              <p className="text-[11px] text-muted-foreground">Between 3 to 15 slides.</p>
+              <div className="border-input flex h-9 items-center rounded-md border bg-transparent shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setSlideCount((prev) => Math.max(1, prev - 1))}
+                  disabled={slideCount <= 1}
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted flex h-full w-9 cursor-pointer items-center justify-center rounded-l-md transition-colors disabled:pointer-events-none disabled:opacity-30"
+                  title="Decrease slides"
+                >
+                  <Minus className="h-3.5 w-3.5" />
+                </button>
+                <Input
+                  type="number"
+                  value={slideCount}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (!isNaN(val)) {
+                      setSlideCount(Math.max(1, Math.min(MAX_SLIDES, val)));
+                    } else if (e.target.value === "") {
+                      setSlideCount(1);
+                    }
+                  }}
+                  min={1}
+                  max={MAX_SLIDES}
+                  className="h-full [appearance:textfield] border-0 px-1 text-center font-semibold shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSlideCount((prev) => Math.min(MAX_SLIDES, prev + 1))
+                  }
+                  disabled={slideCount >= MAX_SLIDES}
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted flex h-full w-9 cursor-pointer items-center justify-center rounded-r-md transition-colors disabled:pointer-events-none disabled:opacity-30"
+                  title="Increase slides"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <p className="text-muted-foreground text-[11px]">
+                Between 1 to {MAX_SLIDES} slides.
+              </p>
             </div>
 
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5 text-xs font-semibold">
-                <AtSign className="h-3.5 w-3.5 text-primary" />
+                <AtSign className="text-primary h-3.5 w-3.5" />
                 Watermark / Handle
               </Label>
               <Input
@@ -252,41 +312,44 @@ Generate exactly ${slideCount} slides. The first slide MUST be "intro" and the l
                 placeholder="@yourhandle or Brand"
                 className="h-9 text-sm"
               />
-              <p className="text-[11px] text-muted-foreground">Appears at the bottom of slides.</p>
+              <p className="text-muted-foreground text-[11px]">
+                Appears at the bottom of slides.
+              </p>
             </div>
           </div>
 
           {/* Additional Info / Posting Notes */}
           <div className="space-y-1.5">
             <Label className="flex items-center gap-1.5 text-xs font-semibold">
-              <Hash className="h-3.5 w-3.5 text-primary" />
+              <Hash className="text-primary h-3.5 w-3.5" />
               Additional Info & Posting Context (Optional)
             </Label>
             <Textarea
               value={additionalInfo}
               onChange={(e) => setAdditionalInfo(e.target.value)}
               placeholder="E.g. Target audience: junior developers; Tone: friendly and actionable; Include a CTA to bookmark and follow..."
-              className="min-h-[70px] text-xs resize-none"
+              className="min-h-[70px] resize-none text-xs"
             />
-            <p className="text-[11px] text-muted-foreground">
-              Guide the tone, audience, key takeaways, or specific call-to-action for your post.
+            <p className="text-muted-foreground text-[11px]">
+              Guide the tone, audience, key takeaways, or specific
+              call-to-action for your post.
             </p>
           </div>
 
           {error && (
-            <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-md border border-destructive/20">
+            <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
               {error}
             </div>
           )}
 
           <Button
-            className="w-full gap-2 mt-2"
+            className="mt-2 w-full gap-2"
             onClick={handleGenerate}
             disabled={isPending || !prompt.trim()}
           >
             {isPending ? (
               <>
-                <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                <div className="border-primary-foreground/30 border-t-primary-foreground h-4 w-4 animate-spin rounded-full border-2" />
                 Generating Carousel...
               </>
             ) : (

@@ -55,6 +55,11 @@ export function SlideProperties() {
               }}
             />
           )}
+          {activeSlide.background.type === "preset" && (
+            <span className="text-xs text-muted-foreground truncate max-w-[180px]">
+              {activeSlide.background.name || activeSlide.background.presetId}
+            </span>
+          )}
           {activeSlide.background.type === "image" && (
             <span className="text-xs text-muted-foreground">Image background</span>
           )}

@@ -18,6 +18,8 @@ function SlideThumbnail({ bg, index }: { bg: Background; index: number }) {
           ? { background: `radial-gradient(circle, ${colors})` }
           : { background: `linear-gradient(${bg.angle}deg, ${colors})` };
       }
+      case "preset":
+        return { ...bg.style };
       case "image":
         return { backgroundImage: `url(${bg.src})`, backgroundSize: "cover" };
       case "pattern":

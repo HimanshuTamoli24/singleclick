@@ -79,7 +79,10 @@ export function ImageProperties() {
         <Label className="text-xs">Border Radius</Label>
         <Slider
           value={[el.borderRadius]}
-          onValueChange={([v]) => update({ borderRadius: v ?? 0 })}
+          onValueChange={(val) => {
+            const v = Array.isArray(val) ? val[0] : val;
+            update({ borderRadius: v ?? 0 });
+          }}
           min={0}
           max={100}
           step={1}
@@ -136,7 +139,10 @@ export function ImageProperties() {
           <Label className="text-[10px]">Brightness ({el.brightness}%)</Label>
           <Slider
             value={[el.brightness]}
-            onValueChange={([v]) => update({ brightness: v ?? 100 })}
+            onValueChange={(val) => {
+              const v = Array.isArray(val) ? val[0] : val;
+              update({ brightness: v ?? 100 });
+            }}
             min={0}
             max={200}
           />
@@ -145,7 +151,10 @@ export function ImageProperties() {
           <Label className="text-[10px]">Contrast ({el.contrast}%)</Label>
           <Slider
             value={[el.contrast]}
-            onValueChange={([v]) => update({ contrast: v ?? 100 })}
+            onValueChange={(val) => {
+              const v = Array.isArray(val) ? val[0] : val;
+              update({ contrast: v ?? 100 });
+            }}
             min={0}
             max={200}
           />
@@ -154,7 +163,10 @@ export function ImageProperties() {
           <Label className="text-[10px]">Blur ({el.blur}px)</Label>
           <Slider
             value={[el.blur]}
-            onValueChange={([v]) => update({ blur: v ?? 0 })}
+            onValueChange={(val) => {
+              const v = Array.isArray(val) ? val[0] : val;
+              update({ blur: v ?? 0 });
+            }}
             min={0}
             max={20}
           />

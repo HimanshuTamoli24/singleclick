@@ -61,7 +61,10 @@ export function ShapeProperties() {
         <Label className="text-xs">Border Width</Label>
         <Slider
           value={[el.borderWidth]}
-          onValueChange={([v]) => update({ borderWidth: v ?? 0 })}
+          onValueChange={(val) => {
+            const v = Array.isArray(val) ? val[0] : val;
+            update({ borderWidth: v ?? 0 });
+          }}
           min={0}
           max={20}
           step={1}
@@ -74,7 +77,10 @@ export function ShapeProperties() {
           <Label className="text-xs">Border Radius</Label>
           <Slider
             value={[el.borderRadius]}
-            onValueChange={([v]) => update({ borderRadius: v ?? 0 })}
+            onValueChange={(val) => {
+              const v = Array.isArray(val) ? val[0] : val;
+              update({ borderRadius: v ?? 0 });
+            }}
             min={0}
             max={200}
             step={1}
@@ -132,7 +138,10 @@ export function ShapeProperties() {
           <Label className="text-[10px]">Blur</Label>
           <Slider
             value={[el.shadowBlur]}
-            onValueChange={([v]) => update({ shadowBlur: v ?? 0 })}
+            onValueChange={(val) => {
+              const v = Array.isArray(val) ? val[0] : val;
+              update({ shadowBlur: v ?? 0 });
+            }}
             min={0}
             max={50}
           />

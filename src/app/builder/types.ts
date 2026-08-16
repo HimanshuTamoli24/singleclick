@@ -62,11 +62,19 @@ export interface PatternBackground {
   rotation: number;
 }
 
+export interface PresetBackground {
+  type: "preset";
+  presetId: string;
+  name?: string;
+  style: React.CSSProperties & Record<string, any>;
+}
+
 export type Background =
   | SolidBackground
   | GradientBackground
   | ImageBackground
-  | PatternBackground;
+  | PatternBackground
+  | PresetBackground;
 
 // ─── Base Element ───
 export interface BaseElement {

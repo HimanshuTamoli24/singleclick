@@ -17,6 +17,8 @@ function getBackgroundStyle(bg: Background): React.CSSProperties {
       }
       return { background: `linear-gradient(${bg.angle}deg, ${colors})` };
     }
+    case "preset":
+      return { ...bg.style };
     case "image":
       return {
         backgroundImage: `url(${bg.src})`,

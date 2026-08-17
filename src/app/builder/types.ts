@@ -271,7 +271,8 @@ export type BuilderAction =
   | { type: "LOAD_SLIDES"; payload: { slides: Slide[] } }
   | { type: "ADD_ASSET"; payload: { url: string } }
   | { type: "TOGGLE_ELEMENT_VISIBILITY"; payload: { id: string } }
-  | { type: "TOGGLE_ELEMENT_LOCK"; payload: { id: string } };
+  | { type: "TOGGLE_ELEMENT_LOCK"; payload: { id: string } }
+  | { type: "REORDER_ELEMENTS"; payload: { elements: SlideElement[] } };
 
 // ─── Helpers ───
 export function generateId(): string {

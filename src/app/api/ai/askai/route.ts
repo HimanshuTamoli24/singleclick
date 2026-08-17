@@ -27,7 +27,7 @@ export async function POST(req: Request) {
           content: prompt,
         },
       ],
-      model: "openai/gpt-oss-120b",
+      model: "openai/gpt-oss-20b",
       temperature: 0.7,
       max_completion_tokens: 4096,
       response_format: { type: "json_object" },

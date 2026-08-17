@@ -33,6 +33,7 @@ import {
   exportAllSlidesAsZip,
   exportCarouselPDF,
 } from "~/lib/export";
+import AnimatedLogo from "~/components/ui/animated-logo";
 
 export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
   const { state, dispatch, activeSlide } = useBuilder();
@@ -46,14 +47,19 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
     }
 
     setIsExporting(true);
-    const toastId = toast.loading(`Exporting Slide ${state.activeSlideIndex + 1} (${format.toUpperCase()})...`);
+    const toastId = toast.loading(
+      `Exporting Slide ${state.activeSlideIndex + 1} (${format.toUpperCase()})...`,
+    );
 
     try {
       await exportCurrentSlide(activeSlide, state.activeSlideIndex, {
         format,
         projectTitle: state.projectTitle,
       });
-      toast.success(`Slide ${state.activeSlideIndex + 1} exported successfully!`, { id: toastId });
+      toast.success(
+        `Slide ${state.activeSlideIndex + 1} exported successfully!`,
+        { id: toastId },
+      );
     } catch (err: unknown) {
       console.error("Export error:", err);
       const msg = err instanceof Error ? err.message : "Export failed";
@@ -70,17 +76,24 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
     }
 
     setIsExporting(true);
-    const toastId = toast.loading(`Preparing ${state.slides.length} slides for ZIP export...`);
+    const toastId = toast.loading(
+      `Preparing ${state.slides.length} slides for ZIP export...`,
+    );
 
     try {
       await exportAllSlidesAsZip(state.slides, {
         format,
         projectTitle: state.projectTitle,
         onProgress: (p) => {
-          toast.loading(p.message || `Processing slide ${p.current} of ${p.total}...`, { id: toastId });
+          toast.loading(
+            p.message || `Processing slide ${p.current} of ${p.total}...`,
+            { id: toastId },
+          );
         },
       });
-      toast.success(`Exported ${state.slides.length} slides as ZIP!`, { id: toastId });
+      toast.success(`Exported ${state.slides.length} slides as ZIP!`, {
+        id: toastId,
+      });
     } catch (err: unknown) {
       console.error("ZIP Export error:", err);
       const msg = err instanceof Error ? err.message : "ZIP Export failed";
@@ -97,13 +110,18 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
     }
 
     setIsExporting(true);
-    const toastId = toast.loading(`Generating PDF for ${state.slides.length} slides...`);
+    const toastId = toast.loading(
+      `Generating PDF for ${state.slides.length} slides...`,
+    );
 
     try {
       await exportCarouselPDF(state.slides, {
         projectTitle: state.projectTitle,
         onProgress: (p) => {
-          toast.loading(p.message || `Rendering slide ${p.current} of ${p.total}...`, { id: toastId });
+          toast.loading(
+            p.message || `Rendering slide ${p.current} of ${p.total}...`,
+            { id: toastId },
+          );
         },
       });
       toast.success(`Exported carousel PDF successfully!`, { id: toastId });
@@ -121,10 +139,8 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
       {/* Left Section */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <div className="bg-primary flex h-6 w-6 items-center justify-center rounded-md">
-            <span className="text-primary-foreground text-xs font-bold">P</span>
-          </div>
-          <span className="text-sm font-semibold">PostBuilder</span>
+          <AnimatedLogo />
+          <span className="text-sm font-semibold">Single Click</span>
         </div>
 
         <div className="bg-border h-5 w-px" />
@@ -145,7 +161,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           />
         ) : (
           <button
-            className="text-muted-foreground hover:text-foreground text-sm transition-colors cursor-pointer"
+            className="text-muted-foreground hover:text-foreground cursor-pointer text-sm transition-colors"
             onClick={() => setEditingTitle(true)}
           >
             {state.projectTitle}
@@ -160,7 +176,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           size="sm"
           onClick={() => dispatch({ type: "UNDO" })}
           disabled={state.undoStack.length === 0}
-          className="h-8 w-8 p-0 cursor-pointer"
+          className="h-8 w-8 cursor-pointer p-0"
           title="Undo (Ctrl+Z)"
         >
           <Undo2 className="h-4 w-4" />
@@ -170,7 +186,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           size="sm"
           onClick={() => dispatch({ type: "REDO" })}
           disabled={state.redoStack.length === 0}
-          className="h-8 w-8 p-0 cursor-pointer"
+          className="h-8 w-8 cursor-pointer p-0"
           title="Redo (Ctrl+Shift+Z)"
         >
           <Redo2 className="h-4 w-4" />
@@ -184,7 +200,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           onClick={() =>
             dispatch({ type: "SET_VIEW_MODE", payload: { mode: "desktop" } })
           }
-          className="h-8 w-8 p-0 cursor-pointer"
+          className="h-8 w-8 cursor-pointer p-0"
         >
           <Monitor className="h-4 w-4" />
         </Button>
@@ -197,7 +213,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           onClick={() =>
             dispatch({ type: "SET_ZOOM", payload: { zoom: state.zoom - 10 } })
           }
-          className="h-8 w-8 p-0 cursor-pointer"
+          className="h-8 w-8 cursor-pointer p-0"
         >
           <ZoomOut className="h-4 w-4" />
         </Button>
@@ -210,7 +226,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           onClick={() =>
             dispatch({ type: "SET_ZOOM", payload: { zoom: state.zoom + 10 } })
           }
-          className="h-8 w-8 p-0 cursor-pointer"
+          className="h-8 w-8 cursor-pointer p-0"
         >
           <ZoomIn className="h-4 w-4" />
         </Button>
@@ -221,31 +237,36 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
         <Button
           variant="outline"
           size="sm"
-          className="h-8 gap-1.5 cursor-pointer"
+          className="h-8 cursor-pointer gap-1.5"
           onClick={onAIGenerate}
         >
-          <Sparkles className="h-3.5 w-3.5 text-primary" />
+          <Sparkles className="text-primary h-3.5 w-3.5" />
           AI Generate
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0 cursor-pointer"
+          className="h-8 w-8 cursor-pointer p-0"
           onClick={() => dispatch({ type: "TOGGLE_PREVIEW" })}
           title="Preview Mode"
         >
           <Eye className="h-4 w-4" />
         </Button>
 
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 cursor-pointer" title="Save">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 cursor-pointer p-0"
+          title="Save"
+        >
           <Save className="h-4 w-4" />
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger
             disabled={isExporting}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isExporting ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -256,7 +277,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider">
+              <DropdownMenuLabel className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
                 Current Slide
               </DropdownMenuLabel>
               <DropdownMenuItem
@@ -280,7 +301,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider">
+              <DropdownMenuLabel className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
                 All Slides ({state.slides.length})
               </DropdownMenuLabel>
               <DropdownMenuItem
@@ -304,7 +325,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider">
+              <DropdownMenuLabel className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
                 Carousel Document
               </DropdownMenuLabel>
               <DropdownMenuItem

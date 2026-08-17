@@ -232,6 +232,16 @@ function builderReducer(
       return { ...newState, slides };
     }
 
+    case "REORDER_ELEMENTS": {
+      const newState = pushUndo(state);
+      const slides = newState.slides.map((s, i) =>
+        i === newState.activeSlideIndex
+          ? { ...s, elements: action.payload.elements }
+          : s,
+      );
+      return { ...newState, slides };
+    }
+
     case "COPY_ELEMENT": {
       const slide = state.slides[state.activeSlideIndex];
       if (!slide || !state.selectedElementId) return state;

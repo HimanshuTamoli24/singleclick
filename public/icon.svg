@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Subtle dark pill backdrop for favicon contrast -->
+  <rect width="100" height="100" rx="28" fill="#111111" />
+  
+  <!-- Lazy Cat Tail (Curled & Swished) -->
+  <path
+    d="M 36 60 C 26 60 16 52 16 43 C 16 34 22 30 25 26 C 26 24 25 22 22 23 C 16 25 10 32 10 43 C 10 56 22 66 36 66 Z"
+    fill="#FFFFFF"
+  />
+  <circle cx="22" cy="24" r="3.5" fill="#FFFFFF" />
+
+  <!-- Lazy Cat Body (Lying melted flat on surface) -->
+  <path
+    d="M 32 68 
+       C 28 68 28 58 34 54 
+       C 40 48 46 45 56 45 
+       C 66 45 74 48 80 53 
+       C 85 57 86 63 86 67 
+       C 86 69 82 69 80 69 
+       C 74 69 42 69 32 68 Z"
+    fill="#FFFFFF"
+  />
+
+  <!-- Front Paws -->
+  <ellipse cx="83" cy="68" rx="5.5" ry="2.6" fill="#FFFFFF" />
+  <ellipse cx="75" cy="68" rx="6" ry="2.6" fill="#FFFFFF" />
+  <ellipse cx="34" cy="68" rx="4.5" ry="2.4" fill="#FFFFFF" />
+
+  <!-- Ears -->
+  <path d="M 68 47 L 64 39 L 73 45 Z" fill="#FFFFFF" />
+  <path d="M 73 46 L 73 37 L 80 44 Z" fill="#FFFFFF" />
+  <path d="M 74 44 L 74 39 L 78 43 Z" fill="#111111" />
+
+  <!-- Sleeping Closed Eye -->
+  <path
+    d="M 76 56 Q 79 58 82 56"
+    fill="none"
+    stroke="#111111"
+    stroke-width="1.8"
+    stroke-linecap="round"
+  />
+
+  <!-- Nose -->
+  <circle cx="84" cy="58" r="1.1" fill="#111111" />
+</svg>

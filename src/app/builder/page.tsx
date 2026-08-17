@@ -26,9 +26,12 @@ function BuilderContent() {
   return (
     <>
       <MobileGuard />
-      <div className="h-screen hidden md:flex flex-col overflow-hidden">
+      <div
+        data-lenis-prevent="true"
+        className="hidden h-screen flex-col overflow-hidden md:flex"
+      >
         <BuilderHeader onAIGenerate={() => setAiModalOpen(true)} />
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden" data-lenis-prevent="true">
           <LeftSidebar />
           <CanvasWorkspace />
           <RightPropertiesPanel />

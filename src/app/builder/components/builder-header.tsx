@@ -10,21 +10,111 @@ import {
   Save,
   Download,
   Sparkles,
+  Loader2,
+  FileImage,
+  FileArchive,
+  FileText,
 } from "lucide-react";
 import { useBuilder } from "../context";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { useState } from "react";
+import { toast } from "sonner";
+import {
+  exportCurrentSlide,
+  exportAllSlidesAsZip,
+  exportCarouselPDF,
+} from "~/lib/export";
 
 export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
-  const { state, dispatch } = useBuilder();
+  const { state, dispatch, activeSlide } = useBuilder();
   const [editingTitle, setEditingTitle] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportCurrent = async (format: "png" | "jpeg") => {
+    if (!activeSlide) {
+      toast.error("No active slide to export.");
+      return;
+    }
+
+    setIsExporting(true);
+    const toastId = toast.loading(`Exporting Slide ${state.activeSlideIndex + 1} (${format.toUpperCase()})...`);
+
+    try {
+      await exportCurrentSlide(activeSlide, state.activeSlideIndex, {
+        format,
+        projectTitle: state.projectTitle,
+      });
+      toast.success(`Slide ${state.activeSlideIndex + 1} exported successfully!`, { id: toastId });
+    } catch (err: unknown) {
+      console.error("Export error:", err);
+      const msg = err instanceof Error ? err.message : "Export failed";
+      toast.error(msg, { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportZip = async (format: "png" | "jpeg") => {
+    if (!state.slides || state.slides.length === 0) {
+      toast.error("No slides to export.");
+      return;
+    }
+
+    setIsExporting(true);
+    const toastId = toast.loading(`Preparing ${state.slides.length} slides for ZIP export...`);
+
+    try {
+      await exportAllSlidesAsZip(state.slides, {
+        format,
+        projectTitle: state.projectTitle,
+        onProgress: (p) => {
+          toast.loading(p.message || `Processing slide ${p.current} of ${p.total}...`, { id: toastId });
+        },
+      });
+      toast.success(`Exported ${state.slides.length} slides as ZIP!`, { id: toastId });
+    } catch (err: unknown) {
+      console.error("ZIP Export error:", err);
+      const msg = err instanceof Error ? err.message : "ZIP Export failed";
+      toast.error(msg, { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!state.slides || state.slides.length === 0) {
+      toast.error("No slides to export.");
+      return;
+    }
+
+    setIsExporting(true);
+    const toastId = toast.loading(`Generating PDF for ${state.slides.length} slides...`);
+
+    try {
+      await exportCarouselPDF(state.slides, {
+        projectTitle: state.projectTitle,
+        onProgress: (p) => {
+          toast.loading(p.message || `Rendering slide ${p.current} of ${p.total}...`, { id: toastId });
+        },
+      });
+      toast.success(`Exported carousel PDF successfully!`, { id: toastId });
+    } catch (err: unknown) {
+      console.error("PDF Export error:", err);
+      const msg = err instanceof Error ? err.message : "PDF Export failed";
+      toast.error(msg, { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <header className="bg-background z-50 flex h-12 shrink-0 items-center justify-between border-b px-4">
@@ -55,7 +145,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           />
         ) : (
           <button
-            className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+            className="text-muted-foreground hover:text-foreground text-sm transition-colors cursor-pointer"
             onClick={() => setEditingTitle(true)}
           >
             {state.projectTitle}
@@ -70,7 +160,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           size="sm"
           onClick={() => dispatch({ type: "UNDO" })}
           disabled={state.undoStack.length === 0}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 cursor-pointer"
           title="Undo (Ctrl+Z)"
         >
           <Undo2 className="h-4 w-4" />
@@ -80,7 +170,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           size="sm"
           onClick={() => dispatch({ type: "REDO" })}
           disabled={state.redoStack.length === 0}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 cursor-pointer"
           title="Redo (Ctrl+Shift+Z)"
         >
           <Redo2 className="h-4 w-4" />
@@ -94,7 +184,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           onClick={() =>
             dispatch({ type: "SET_VIEW_MODE", payload: { mode: "desktop" } })
           }
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 cursor-pointer"
         >
           <Monitor className="h-4 w-4" />
         </Button>
@@ -107,7 +197,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           onClick={() =>
             dispatch({ type: "SET_ZOOM", payload: { zoom: state.zoom - 10 } })
           }
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 cursor-pointer"
         >
           <ZoomOut className="h-4 w-4" />
         </Button>
@@ -120,7 +210,7 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
           onClick={() =>
             dispatch({ type: "SET_ZOOM", payload: { zoom: state.zoom + 10 } })
           }
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 cursor-pointer"
         >
           <ZoomIn className="h-4 w-4" />
         </Button>
@@ -131,48 +221,101 @@ export function BuilderHeader({ onAIGenerate }: { onAIGenerate: () => void }) {
         <Button
           variant="outline"
           size="sm"
-          className="h-8 gap-1.5"
+          className="h-8 gap-1.5 cursor-pointer"
           onClick={onAIGenerate}
         >
-          <Sparkles className="h-3.5 w-3.5" />
+          <Sparkles className="h-3.5 w-3.5 text-primary" />
           AI Generate
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 cursor-pointer"
           onClick={() => dispatch({ type: "TOGGLE_PREVIEW" })}
-          title="Preview"
+          title="Preview Mode"
         >
           <Eye className="h-4 w-4" />
         </Button>
 
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Save">
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 cursor-pointer" title="Save">
           <Save className="h-4 w-4" />
         </Button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium">
-            <Download className="h-3.5 w-3.5" />
+          <DropdownMenuTrigger
+            disabled={isExporting}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+          >
+            {isExporting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Download className="h-3.5 w-3.5" />
+            )}
             Export
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
-            <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
-              Current Slide
-            </div>
-            <DropdownMenuItem>PNG</DropdownMenuItem>
-            <DropdownMenuItem>JPG</DropdownMenuItem>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider">
+                Current Slide
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                className="cursor-pointer gap-2"
+                onClick={() => handleExportCurrent("png")}
+                disabled={isExporting}
+              >
+                <FileImage className="h-4 w-4 text-blue-500" />
+                <span>Export as PNG</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer gap-2"
+                onClick={() => handleExportCurrent("jpeg")}
+                disabled={isExporting}
+              >
+                <FileImage className="h-4 w-4 text-amber-500" />
+                <span>Export as JPG</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
-            <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
-              All Slides
-            </div>
-            <DropdownMenuItem>ZIP (all as PNG)</DropdownMenuItem>
+
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider">
+                All Slides ({state.slides.length})
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                className="cursor-pointer gap-2"
+                onClick={() => handleExportZip("png")}
+                disabled={isExporting}
+              >
+                <FileArchive className="h-4 w-4 text-emerald-500" />
+                <span>PNG Images (ZIP)</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer gap-2"
+                onClick={() => handleExportZip("jpeg")}
+                disabled={isExporting}
+              >
+                <FileArchive className="h-4 w-4 text-emerald-500" />
+                <span>JPG Images (ZIP)</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
-            <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
-              Carousel
-            </div>
-            <DropdownMenuItem>PDF</DropdownMenuItem>
+
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider">
+                Carousel Document
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                className="cursor-pointer gap-2"
+                onClick={handleExportPdf}
+                disabled={isExporting}
+              >
+                <FileText className="h-4 w-4 text-red-500" />
+                <span>Download PDF</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

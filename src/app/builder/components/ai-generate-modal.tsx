@@ -10,7 +10,8 @@ import {
   AtSign,
   Lightbulb,
   Check,
-  ChevronDown,
+  Minus,
+  Plus,
 } from "lucide-react";
 
 import { useBuilder } from "../context";
@@ -25,6 +26,7 @@ import {
 } from "~/components/ui/dialog";
 
 import { Button } from "~/components/ui/button";
+import { ButtonGroup } from "~/components/ui/button-group";
 import { Textarea } from "~/components/ui/textarea";
 import { Input } from "~/components/ui/input";
 
@@ -409,58 +411,86 @@ Return JSON only following the specified output schema.
                           : "border-border bg-background hover:bg-muted",
                       ].join(" ")}
                     >
-                      <span className="mr-1.5">{item.emoji}</span>
-
                       {item.label}
                     </button>
                   );
                 })}
               </div>
             </section>
-
-            <div className="flex items-center justify-between">
-              {" "}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {/* SLIDES */}
-              <section className="space-y-3">
-                <SectionTitle icon={<Layers />} title="How many pages?" />
-
-                <div className="flex gap-2">
-                  {SLIDE_OPTIONS.map((count) => {
-                    const selected = slideCount === count;
-
-                    return (
-                      <button
-                        key={count}
-                        type="button"
-                        onClick={() =>
-                          setSlideCount(Math.min(count, MAX_SLIDES))
-                        }
-                        className={[
-                          "h-10 min-w-[48px] rounded-xl border text-sm font-semibold transition-all",
-                          selected
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border hover:bg-muted",
-                        ].join(" ")}
-                      >
-                        {count}
-                      </button>
-                    );
-                  })}
+              <section className="space-y-2.5 rounded-md border p-2">
+                <div className="flex min-h-5 items-center justify-between">
+                  <SectionTitle icon={<Layers />} title="How many slides?" />
+                  <span className="text-muted-foreground text-[11px] font-medium">
+                    {MAX_SLIDES} max
+                  </span>
                 </div>
+
+                <ButtonGroup className="h-10 w-fit">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      setSlideCount((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={slideCount <= 1}
+                    className="h-10 w-10 cursor-pointer rounded-l-xl disabled:cursor-not-allowed disabled:opacity-30"
+                    title="Decrease slides"
+                  >
+                    <Minus className="size-4" />
+                  </Button>
+
+                  <Input
+                    type="number"
+                    value={slideCount}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+
+                      if (!isNaN(val)) {
+                        setSlideCount(Math.max(1, Math.min(MAX_SLIDES, val)));
+                      } else if (e.target.value === "") {
+                        setSlideCount(1);
+                      }
+                    }}
+                    min={1}
+                    max={MAX_SLIDES}
+                    aria-label="Number of slides"
+                    className="h-10 w-14 [appearance:textfield] rounded-none border-x-0 text-center font-semibold shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      setSlideCount((prev) => Math.min(MAX_SLIDES, prev + 1))
+                    }
+                    disabled={slideCount >= MAX_SLIDES}
+                    className="h-10 w-10 cursor-pointer rounded-r-xl disabled:cursor-not-allowed disabled:opacity-30"
+                    title="Increase slides"
+                  >
+                    <Plus className="size-4" />
+                  </Button>
+                </ButtonGroup>
               </section>
+
               {/* BRAND */}
-              <section className="space-y-3">
-                <SectionTitle
-                  icon={<AtSign />}
-                  title="Your name or brand"
-                  optional
-                />
+              <section className="space-y-2.5 rounded-md border p-2">
+                <div className="flex min-h-5 items-center">
+                  <SectionTitle
+                    icon={<AtSign />}
+                    title="Your name or brand"
+                    optional
+                  />
+                </div>
 
                 <Input
                   value={brandName}
                   onChange={(event) => setBrandName(event.target.value)}
                   placeholder="@yourname or your brand"
-                  className="h-11 rounded-xl"
+                  className="h-10 rounded-xl"
                 />
               </section>
             </div>

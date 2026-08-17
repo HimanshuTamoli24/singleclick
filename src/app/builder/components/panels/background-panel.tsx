@@ -9,17 +9,14 @@ import { Button } from "~/components/ui/button";
 import { Slider } from "~/components/ui/slider";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
-import { Search, Sparkles, CopyCheck } from "lucide-react";
+import { Search, CopyCheck } from "lucide-react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "~/components/ui/input-group";
 
 type SubPanel = "solid" | "gradient" | "image";
-
-const CATEGORIES = [
-  { id: "all", label: "All" },
-  { id: "gradients", label: "Glows & Gradients" },
-  { id: "effects", label: "Pastels & Sunrise" },
-  { id: "decorative", label: "Radials" },
-  { id: "geometric", label: "Grids & Lines" },
-];
 
 export function BackgroundPanel() {
   const { state, dispatch, activeSlide } = useBuilder();
@@ -36,6 +33,17 @@ export function BackgroundPanel() {
   const [gradientMode, setGradientMode] = useState<"presets" | "custom">(
     "presets",
   );
+
+  // Filtered patterns from bg-patterns.ts (all patterns in one unified list)
+  const filteredPatterns = useMemo(() => {
+    if (!patternSearch.trim()) return gridPatterns;
+    const query = patternSearch.toLowerCase().trim();
+    return gridPatterns.filter(
+      (pattern) =>
+        pattern.name.toLowerCase().includes(query) ||
+        pattern.id.toLowerCase().includes(query),
+    );
+  }, [patternSearch]);
 
   if (!activeSlide) return null;
 
@@ -55,17 +63,6 @@ export function BackgroundPanel() {
       });
     });
   };
-
-  // Filtered patterns from bg-patterns.ts (all patterns in one unified list)
-  const filteredPatterns = useMemo(() => {
-    if (!patternSearch.trim()) return gridPatterns;
-    const query = patternSearch.toLowerCase().trim();
-    return gridPatterns.filter(
-      (pattern) =>
-        pattern.name.toLowerCase().includes(query) ||
-        pattern.id.toLowerCase().includes(query),
-    );
-  }, [patternSearch]);
 
   const activeColor =
     activeSlide.background.type === "solid"
@@ -375,15 +372,21 @@ export function BackgroundPanel() {
           {gradientMode === "presets" ? (
             <div className="space-y-2.5">
               {/* Search Bar */}
-              <div className="relative">
-                <Search className="text-muted-foreground absolute top-2 left-2 h-3.5 w-3.5" />
-                <Input
-                  placeholder="Search gradients & patterns..."
+
+              <InputGroup className="max-w-xs">
+                <InputGroupInput
+                  placeholder="Search gradients..."
                   value={patternSearch}
                   onChange={(e) => setPatternSearch(e.target.value)}
                   className="h-7 pl-7 text-xs"
                 />
-              </div>
+                <InputGroupAddon>
+                  <Search />
+                </InputGroupAddon>
+                <InputGroupAddon align="inline-end">
+                  {gridPatterns.length} items
+                </InputGroupAddon>
+              </InputGroup>
 
               {/* Pattern Presets Grid */}
               <div className="grid max-h-[340px] grid-cols-2 gap-2 overflow-y-auto p-0.5">

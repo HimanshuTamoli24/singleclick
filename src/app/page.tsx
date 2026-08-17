@@ -1,16 +1,14 @@
-import { headers } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
-import { getSession } from "~/server/better-auth/server";
-
-export default async function Home() {
-  const session = await getSession();
-
+export default function Home() {
   return (
-    <div>
-      <Link href="/builder">Build</Link>
+    <div className="flex h-screen w-screen items-center justify-center">
+      <Link
+        href="/builder"
+        className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium"
+      >
+        Go to Carousel Builder
+      </Link>
     </div>
   );
 }

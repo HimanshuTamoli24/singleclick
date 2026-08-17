@@ -1,25 +1,49 @@
 "use client";
 
 import { useBuilder } from "../../context";
-import type { TextElement, TextAlign, TextTransform } from "../../types";
+import type {
+  TextElement,
+  TextAlign,
+  TextTransform,
+  WatermarkElement,
+  CodeElement,
+} from "../../types";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { Slider } from "~/components/ui/slider";
 import { Button } from "~/components/ui/button";
 import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "~/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useState } from "react";
 
-function Section({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+function Section({
+  title,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger className="flex items-center justify-between w-full py-1.5 group">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</span>
-        <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform", open && "rotate-180")} />
+      <CollapsibleTrigger className="group flex w-full items-center justify-between py-1.5">
+        <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          {title}
+        </span>
+        <ChevronDown
+          className={cn(
+            "text-muted-foreground h-3.5 w-3.5 transition-transform",
+            open && "rotate-180",
+          )}
+        />
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-3 pt-1 pb-2">
         {children}
@@ -28,18 +52,36 @@ function Section({ title, children, defaultOpen = true }: { title: string; child
   );
 }
 
+type TextLikeElement = TextElement | WatermarkElement | CodeElement;
+
 export function TextProperties() {
   const { selectedElement, dispatch } = useBuilder();
 
   if (!selectedElement) return null;
 
   // This component handles text, code, and watermark elements
-  const el = selectedElement as TextElement;
+  const el = selectedElement as unknown as TextLikeElement;
   const isCode = selectedElement.type === "code";
-  const isWatermark = selectedElement.type === "watermark";
+
+  const textEl =
+    selectedElement.type === "text" ? selectedElement : null;
+  const content = "content" in el ? el.content : "";
+  const fontFamily = "fontFamily" in el ? el.fontFamily : "Inter, sans-serif";
+  const fontSize = "fontSize" in el ? el.fontSize : 48;
+  const fontWeight = "fontWeight" in el ? el.fontWeight : 700;
+  const color =
+    "color" in el
+      ? el.color
+      : "textColor" in el
+        ? el.textColor
+        : "#FFFFFF";
+  const textAlign = textEl?.textAlign ?? "left";
+  const lineHeight = textEl?.lineHeight ?? 1.2;
+  const letterSpacing = textEl?.letterSpacing ?? 0;
+  const textTransform = textEl?.textTransform ?? "none";
 
   const update = (updates: Record<string, unknown>) => {
-    dispatch({ type: "UPDATE_ELEMENT", payload: { id: el.id, updates: updates as any } });
+    dispatch({ type: "UPDATE_ELEMENT", payload: { id: el.id, updates } });
   };
 
   return (
@@ -47,9 +89,9 @@ export function TextProperties() {
       {/* Content */}
       <Section title="Content">
         <Textarea
-          value={(el as any).content ?? ""}
+          value={content ?? ""}
           onChange={(e) => update({ content: e.target.value })}
-          className="text-xs min-h-[80px] resize-y"
+          className="min-h-[80px] resize-y text-xs"
           placeholder="Enter text content..."
         />
       </Section>
@@ -59,9 +101,9 @@ export function TextProperties() {
         <div className="space-y-1.5">
           <Label className="text-xs">Font Family</Label>
           <select
-            value={(el as any).fontFamily ?? "Inter, sans-serif"}
+            value={fontFamily ?? "Inter, sans-serif"}
             onChange={(e) => update({ fontFamily: e.target.value })}
-            className="w-full h-8 rounded-md border bg-background px-2 text-xs"
+            className="bg-background h-8 w-full rounded-md border px-2 text-xs"
           >
             <option value="Inter, sans-serif">Inter</option>
             <option value="Georgia, serif">Georgia</option>
@@ -76,8 +118,10 @@ export function TextProperties() {
             <Label className="text-xs">Size</Label>
             <Input
               type="number"
-              value={(el as any).fontSize ?? 48}
-              onChange={(e) => update({ fontSize: parseInt(e.target.value) || 16 })}
+              value={fontSize ?? 48}
+              onChange={(e) =>
+                update({ fontSize: parseInt(e.target.value) || 16 })
+              }
               className="h-8 text-xs"
               min={8}
               max={200}
@@ -86,9 +130,9 @@ export function TextProperties() {
           <div className="space-y-1.5">
             <Label className="text-xs">Weight</Label>
             <select
-              value={(el as any).fontWeight ?? 700}
+              value={fontWeight ?? 700}
               onChange={(e) => update({ fontWeight: parseInt(e.target.value) })}
-              className="w-full h-8 rounded-md border bg-background px-2 text-xs"
+              className="bg-background h-8 w-full rounded-md border px-2 text-xs"
             >
               <option value={300}>Light</option>
               <option value={400}>Regular</option>
@@ -103,17 +147,17 @@ export function TextProperties() {
 
         <div className="space-y-1.5">
           <Label className="text-xs">Color</Label>
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center gap-2">
             <input
               type="color"
-              value={(el as any).color ?? "#FFFFFF"}
+              value={color ?? "#FFFFFF"}
               onChange={(e) => update({ color: e.target.value })}
-              className="w-8 h-8 rounded cursor-pointer border-0 p-0"
+              className="h-8 w-8 cursor-pointer rounded border-0 p-0"
             />
             <Input
-              value={(el as any).color ?? "#FFFFFF"}
+              value={color ?? "#FFFFFF"}
               onChange={(e) => update({ color: e.target.value })}
-              className="h-8 text-xs font-mono"
+              className="h-8 font-mono text-xs"
             />
           </div>
         </div>
@@ -125,9 +169,9 @@ export function TextProperties() {
               {(["left", "center", "right"] as TextAlign[]).map((a) => (
                 <Button
                   key={a}
-                  variant={(el as any).textAlign === a ? "secondary" : "ghost"}
+                  variant={textAlign === a ? "secondary" : "ghost"}
                   size="sm"
-                  className="h-7 w-7 p-0 flex-1"
+                  className="h-7 w-7 flex-1 p-0"
                   onClick={() => update({ textAlign: a })}
                 >
                   {a === "left" && <AlignLeft className="h-3.5 w-3.5" />}
@@ -145,8 +189,10 @@ export function TextProperties() {
             <Input
               type="number"
               step={0.1}
-              value={(el as any).lineHeight ?? 1.2}
-              onChange={(e) => update({ lineHeight: parseFloat(e.target.value) || 1.2 })}
+              value={lineHeight ?? 1.2}
+              onChange={(e) =>
+                update({ lineHeight: parseFloat(e.target.value) || 1.2 })
+              }
               className="h-8 text-xs"
               min={0.5}
               max={3}
@@ -156,8 +202,10 @@ export function TextProperties() {
             <Label className="text-xs">Spacing</Label>
             <Input
               type="number"
-              value={(el as any).letterSpacing ?? 0}
-              onChange={(e) => update({ letterSpacing: parseFloat(e.target.value) || 0 })}
+              value={letterSpacing ?? 0}
+              onChange={(e) =>
+                update({ letterSpacing: parseFloat(e.target.value) || 0 })
+              }
               className="h-8 text-xs"
               min={-5}
               max={20}
@@ -169,10 +217,17 @@ export function TextProperties() {
           <div className="space-y-1.5">
             <Label className="text-xs">Transform</Label>
             <div className="flex gap-1">
-              {(["none", "uppercase", "lowercase", "capitalize"] as TextTransform[]).map((t) => (
+              {(
+                [
+                  "none",
+                  "uppercase",
+                  "lowercase",
+                  "capitalize",
+                ] as TextTransform[]
+              ).map((t) => (
                 <Button
                   key={t}
-                  variant={(el as any).textTransform === t ? "secondary" : "ghost"}
+                  variant={textTransform === t ? "secondary" : "ghost"}
                   size="sm"
                   className="h-7 flex-1 text-[10px] capitalize"
                   onClick={() => update({ textTransform: t })}
@@ -211,7 +266,9 @@ export function TextProperties() {
             <Input
               type="number"
               value={el.width}
-              onChange={(e) => update({ width: parseInt(e.target.value) || 100 })}
+              onChange={(e) =>
+                update({ width: parseInt(e.target.value) || 100 })
+              }
               className="h-8 text-xs"
             />
           </div>
@@ -220,7 +277,9 @@ export function TextProperties() {
             <Input
               type="number"
               value={el.height}
-              onChange={(e) => update({ height: parseInt(e.target.value) || 100 })}
+              onChange={(e) =>
+                update({ height: parseInt(e.target.value) || 100 })
+              }
               className="h-8 text-xs"
             />
           </div>
@@ -232,7 +291,9 @@ export function TextProperties() {
             <Input
               type="number"
               value={el.rotation}
-              onChange={(e) => update({ rotation: parseInt(e.target.value) || 0 })}
+              onChange={(e) =>
+                update({ rotation: parseInt(e.target.value) || 0 })
+              }
               className="h-8 text-xs"
               min={-360}
               max={360}
@@ -244,7 +305,9 @@ export function TextProperties() {
               type="number"
               step={0.05}
               value={el.opacity}
-              onChange={(e) => update({ opacity: parseFloat(e.target.value) || 1 })}
+              onChange={(e) =>
+                update({ opacity: parseFloat(e.target.value) || 1 })
+              }
               className="h-8 text-xs"
               min={0}
               max={1}

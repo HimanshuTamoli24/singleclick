@@ -4,7 +4,7 @@ export interface Pattern {
   category?: string;
   badge?: string;
   description?: string;
-  style: React.CSSProperties & Record<string, any>;
+  style: React.CSSProperties & Record<string, string | number | undefined>;
   code?: string;
 }
 

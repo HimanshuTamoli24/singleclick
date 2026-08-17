@@ -7,6 +7,11 @@ import { useBuilder } from "../../context";
 import type { Theme, Background } from "../../types";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "~/components/ui/input-group";
 
 export function TemplatesPanel() {
   const { state, dispatch } = useBuilder();
@@ -16,9 +21,7 @@ export function TemplatesPanel() {
     if (!search.trim()) return PRESET_THEMES;
     const q = search.toLowerCase().trim();
     return PRESET_THEMES.filter(
-      (t) =>
-        t.name.toLowerCase().includes(q) ||
-        t.id.toLowerCase().includes(q),
+      (t) => t.name.toLowerCase().includes(q) || t.id.toLowerCase().includes(q),
     );
   }, [search]);
 
@@ -67,7 +70,7 @@ export function TemplatesPanel() {
             type: "UPDATE_ELEMENT",
             payload: {
               id: el.id,
-              updates: { color: theme.colors.text } as any,
+              updates: { color: theme.colors.text },
             },
           });
         }
@@ -77,30 +80,22 @@ export function TemplatesPanel() {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h4 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-          Templates ({PRESET_THEMES.length})
-        </h4>
-      </div>
-
       {/* Search Input */}
-      <div className="relative">
-        <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-3.5 w-3.5" />
-        <Input
+
+      <InputGroup className="max-w-xs">
+        <InputGroupInput
           placeholder="Search templates..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="h-8 pr-8 pl-8 text-xs"
         />
-        {search && (
-          <button
-            onClick={() => setSearch("")}
-            className="text-muted-foreground hover:text-foreground absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-sm"
-          >
-            <X className="h-3 w-3" />
-          </button>
-        )}
-      </div>
+        <InputGroupAddon>
+          <Search />
+        </InputGroupAddon>
+        <InputGroupAddon align="inline-end">
+          {PRESET_THEMES.length} items
+        </InputGroupAddon>
+      </InputGroup>
 
       <div className="grid grid-cols-2 gap-2 pb-4">
         {filteredThemes.map((theme) => {
@@ -109,15 +104,15 @@ export function TemplatesPanel() {
             <button
               key={theme.id}
               className={cn(
-                "group relative overflow-hidden rounded-lg border-2 text-left transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer",
+                "group relative cursor-pointer overflow-hidden rounded-lg border-2 text-left transition-all hover:scale-[1.02] hover:shadow-md",
                 isSelected
-                  ? "border-primary ring-2 ring-primary/30 shadow-md"
+                  ? "border-primary ring-primary/30 shadow-md ring-2"
                   : "border-border hover:border-muted-foreground/30",
               )}
               onClick={() => handleApplyTheme(theme)}
             >
               <div
-                className="flex aspect-[4/5] flex-col items-center justify-between p-3 relative overflow-hidden"
+                className="relative flex aspect-[4/5] flex-col items-center justify-between overflow-hidden p-3"
                 style={{ background: theme.colors.background }}
               >
                 <div className="w-full text-center">

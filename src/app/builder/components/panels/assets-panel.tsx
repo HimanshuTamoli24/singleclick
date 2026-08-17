@@ -1,6 +1,6 @@
 "use client";
 
-import { Upload, X } from "lucide-react";
+import { Upload } from "lucide-react";
 import { useBuilder } from "../../context";
 import { createImageElement } from "../../types";
 import { Button } from "~/components/ui/button";
@@ -15,7 +15,7 @@ export function AssetsPanel() {
     if (!files) return;
 
     Array.from(files).forEach((file) => {
-      if (!file.type.match(/image\/(png|jpeg|jpg|webp|svg\+xml)/)) return;
+      if (!/image\/(png|jpeg|jpg|webp|svg\+xml)/.exec(file.type)) return;
       const reader = new FileReader();
       reader.onload = (ev) => {
         const url = ev.target?.result as string;

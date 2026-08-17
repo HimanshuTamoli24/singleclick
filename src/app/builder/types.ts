@@ -56,7 +56,7 @@ export interface PresetBackground {
   type: "preset";
   presetId: string;
   name?: string;
-  style: React.CSSProperties & Record<string, any>;
+  style: React.CSSProperties & Record<string, string | number | undefined>;
 }
 
 export type Background =

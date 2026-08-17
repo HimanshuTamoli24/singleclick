@@ -5,7 +5,7 @@ import { useBuilder } from "../context";
 import { Button } from "~/components/ui/button";
 
 export function FloatingToolbar() {
-  const { state, dispatch, activeSlide, selectedElement } = useBuilder();
+  const { dispatch, activeSlide, selectedElement } = useBuilder();
 
   if (!selectedElement || !activeSlide) return null;
 

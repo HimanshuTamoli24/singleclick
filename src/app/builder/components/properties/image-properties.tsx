@@ -6,15 +6,13 @@ import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { Slider } from "~/components/ui/slider";
 import { Button } from "~/components/ui/button";
-import { useRef } from "react";
 
 export function ImageProperties() {
   const { selectedElement, dispatch } = useBuilder();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!selectedElement || selectedElement.type !== "image") return null;
+  if (selectedElement?.type !== "image") return null;
 
-  const el = selectedElement as ImageElement;
+  const el = selectedElement;
 
   const update = (updates: Partial<ImageElement>) => {
     dispatch({ type: "UPDATE_ELEMENT", payload: { id: el.id, updates } });

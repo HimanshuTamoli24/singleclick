@@ -6,7 +6,7 @@ import { Label } from "~/components/ui/label";
 import { Badge } from "~/components/ui/badge";
 
 export function SlideProperties() {
-  const { activeSlide, state } = useBuilder();
+  const { activeSlide } = useBuilder();
 
   if (!activeSlide) return null;
 
@@ -57,7 +57,7 @@ export function SlideProperties() {
           )}
           {activeSlide.background.type === "preset" && (
             <span className="text-xs text-muted-foreground truncate max-w-[180px]">
-              {activeSlide.background.name || activeSlide.background.presetId}
+              {activeSlide.background.name ?? activeSlide.background.presetId}
             </span>
           )}
           {activeSlide.background.type === "image" && (

@@ -12,7 +12,6 @@ import {
   Download,
   Check,
 } from "lucide-react";
-import { Button } from "~/components/ui/button";
 import React from "react";
 
 export function MobileGuard() {

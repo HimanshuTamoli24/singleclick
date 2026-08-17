@@ -9,9 +9,9 @@ import { Slider } from "~/components/ui/slider";
 export function ShapeProperties() {
   const { selectedElement, dispatch } = useBuilder();
 
-  if (!selectedElement || selectedElement.type !== "shape") return null;
+  if (selectedElement?.type !== "shape") return null;
 
-  const el = selectedElement as ShapeElement;
+  const el = selectedElement;
 
   const update = (updates: Partial<ShapeElement>) => {
     dispatch({ type: "UPDATE_ELEMENT", payload: { id: el.id, updates } });

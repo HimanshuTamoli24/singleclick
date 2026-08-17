@@ -4,7 +4,6 @@ import React, {
   createContext,
   useContext,
   useReducer,
-  useCallback,
   useEffect,
   type ReactNode,
 } from "react";
@@ -13,10 +12,6 @@ import {
   type BuilderAction,
   type Slide,
   type SlideElement,
-  type LeftPanelTab,
-  type ViewMode,
-  type Background,
-  type Theme,
   DEFAULT_THEME,
   MAX_SLIDES,
   createDefaultSlide,
@@ -191,7 +186,7 @@ function builderReducer(
         x: source.x + 20,
         y: source.y + 20,
         name: `${source.name} copy`,
-      } as SlideElement;
+      };
       const slides = newState.slides.map((s, i) =>
         i === newState.activeSlideIndex
           ? { ...s, elements: [...s.elements, dup] }
@@ -241,7 +236,7 @@ function builderReducer(
       const slide = state.slides[state.activeSlideIndex];
       if (!slide || !state.selectedElementId) return state;
       const el = slide.elements.find((e) => e.id === state.selectedElementId);
-      return { ...state, clipboard: el ? ({ ...el } as SlideElement) : null };
+      return { ...state, clipboard: el ? { ...el } : null };
     }
 
     case "PASTE_ELEMENT": {
@@ -252,7 +247,7 @@ function builderReducer(
         id: generateId(),
         x: state.clipboard.x + 20,
         y: state.clipboard.y + 20,
-      } as SlideElement;
+      };
       const slides = newState.slides.map((s, i) =>
         i === newState.activeSlideIndex
           ? { ...s, elements: [...s.elements, pasted] }
@@ -340,7 +335,7 @@ function builderReducer(
               ...s,
               elements: s.elements.map((el) =>
                 el.id === action.payload.id
-                  ? ({ ...el, visible: !el.visible } as SlideElement)
+                  ? { ...el, visible: !el.visible }
                   : el,
               ),
             }
@@ -357,7 +352,7 @@ function builderReducer(
               ...s,
               elements: s.elements.map((el) =>
                 el.id === action.payload.id
-                  ? ({ ...el, locked: !el.locked } as SlideElement)
+                  ? { ...el, locked: !el.locked }
                   : el,
               ),
             }

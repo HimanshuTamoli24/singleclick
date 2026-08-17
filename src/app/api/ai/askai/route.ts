@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { prompt } = await req.json();
-
+    const body = (await req.json()) as { prompt?: string };
+    const prompt = body.prompt;
+    console.log("prompt", prompt);
     if (!prompt) {
       return NextResponse.json(
         { error: "Prompt is required" },
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
       async start(controller) {
         try {
           for await (const chunk of chatCompletion) {
-            const content = chunk.choices[0]?.delta?.content || "";
+            const content = chunk.choices[0]?.delta?.content ?? "";
             if (content) {
               controller.enqueue(new TextEncoder().encode(content));
             }
